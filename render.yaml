@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: stock-price-prediction
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn core.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.9.6
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: stock-price-db
+          property: connectionString
+
+databases:
+  - name: stock-price-db
+    databaseName: stock_price
+    user: stock_price_user 
