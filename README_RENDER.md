@@ -32,7 +32,7 @@ If you prefer to set up manually instead of using the Blueprint:
 4. Configure the service with the following settings:
    - **Name**: stock-price-prediction (or your preferred name)
    - **Environment**: Python
-   - **Build Command**: `pip install -r requirements.txt`
+   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate`
    - **Start Command**: `gunicorn core.wsgi:application`
    - **Plan**: Free (or select another plan)
 
@@ -48,13 +48,47 @@ If you prefer to set up manually instead of using the Blueprint:
    - After creation, copy the "Internal Database URL"
    - Add it as `DATABASE_URL` environment variable to your web service
 
-### 4. Post-Deployment
+### 4. Creating a Superuser without Shell Access
 
-After deployment, run migrations to set up your database:
+Since the free plan doesn't include shell access, you have two options to create a superuser:
 
-1. Go to the "Shell" tab of your web service
-2. Run: `python manage.py migrate`
-3. Optionally create a superuser: `python manage.py createsuperuser`
+#### Option 1: Use a management command in your build script
+
+Create a new file in your project called `create_superuser.py`:
+
+```python
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+import os
+
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin_password')
+
+try:
+    User.objects.create_superuser(username, email, password)
+    print(f'Superuser {username} created successfully!')
+except IntegrityError:
+    print(f'Superuser {username} already exists')
+```
+
+Then update your buildCommand in render.yaml to:
+
+```
+buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py shell < create_superuser.py
+```
+
+Add these environment variables to your service:
+- `DJANGO_SUPERUSER_USERNAME`: your_username
+- `DJANGO_SUPERUSER_EMAIL`: your_email
+- `DJANGO_SUPERUSER_PASSWORD`: your_password
+
+#### Option 2: Create the superuser locally and use database export/import
+
+1. Create a superuser locally on your development machine
+2. Export your local database
+3. Import the database to Render PostgreSQL instance
+   (Note: This requires a paid database plan on Render that allows direct access)
 
 ## Monitoring and Troubleshooting
 
