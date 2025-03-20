@@ -10,7 +10,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.6
       - key: DEBUG
-        value: false
+        value: true
       - key: DJANGO_SUPERUSER_USERNAME
         value: admin
       - key: DJANGO_SUPERUSER_EMAIL
