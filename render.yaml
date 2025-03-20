@@ -2,8 +2,8 @@ services:
   - type: web
     name: stock-price-prediction
     env: python
-    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py shell < create_superuser.py
-    startCommand: gunicorn core.wsgi:application
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py shell < create_superuser.py
+    startCommand: gunicorn core.wsgi:application --workers=2 --threads=2 --timeout=120 --log-file -
     envVars:
       - key: SECRET_KEY
         generateValue: true
@@ -21,6 +21,8 @@ services:
         fromDatabase:
           name: stock-price-db
           property: connectionString
+      - key: ALLOWED_HOSTS
+        value: stock-prediction-system.onrender.com,.onrender.com
 
 databases:
   - name: stock-price-db

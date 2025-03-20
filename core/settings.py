@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-d*2eog&xs-3+50xd0c(i+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['*', '.onrender.com', 'stock-prediction-system.onrender.com']
 
 
 # Application definition
@@ -90,7 +90,12 @@ DATABASES = {
 # Update database configuration with $DATABASE_URL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES['default'] = dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL, 
+        conn_max_age=600, 
+        conn_health_checks=True,
+        ssl_require=True
+    )
 
 
 # Password validation
@@ -129,6 +134,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app/static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
